@@ -10,9 +10,12 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'maven-publish'
+    id 'maven'
+    id 'signing'
 }
 
 group = 'uk.co.tryteksystems'
+archivesBaseName = "should-send-same-site-none"
 version = '0.1.0'
 
 repositories {
@@ -44,10 +47,6 @@ test {
     useJUnitPlatform()
 }
 
-java {
-    withSourcesJar()
-}
-
 tasks.named('jar') {
     manifest {
         attributes('Implementation-Title': project.name,
@@ -55,17 +54,60 @@ tasks.named('jar') {
     }
 }
 
-publishing {
-    publications {
-        myLibrary(MavenPublication) {
-            from components.java
-        }
-    }
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
+artifacts {
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
     repositories {
-        maven {
-            name = 'myRepo'
-            url = "file://${buildDir}/repo"
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Should send same site none'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Library to determine if the SameSite=None cookie attribute should be sent for a given user agent.'
+                url 'https://github.com/stephen-murby/should-send-same-site-none-java'
+
+                scm {
+                    connection 'scm:git:git@github.com:stephen-murby/should-send-same-site-none-java.git'
+                    developerConnection 'scm:git:https://github.com/stephen-murby/should-send-same-site-none-java'
+                    url 'https://github.com/stephen-murby/should-send-same-site-none-java.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'stephen.murby'
+                        name 'Stephen Murby'
+                        email 'stephen.murby@tryteksystems.co.uk'
+                    }
+                }
+            }
         }
     }
 }
