@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: should-send-same-site-none-java
+Implementation-Version: 0.1.0
+
