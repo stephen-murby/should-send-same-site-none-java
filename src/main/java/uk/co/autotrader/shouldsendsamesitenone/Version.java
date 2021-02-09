@@ -1,5 +1,8 @@
-package should.send.same.site.none.java;
+package uk.co.autotrader.shouldsendsamesitenone;
 
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 // https://stackoverflow.com/questions/198431/how-do-you-compare-two-version-strings-in-java
 public class Version implements Comparable<Version> {
@@ -37,14 +40,19 @@ public class Version implements Comparable<Version> {
         return 0;
     }
 
-    @Override public boolean equals(Object that) {
-        if(this == that)
-            return true;
-        if(that == null)
-            return false;
-        if(this.getClass() != that.getClass())
-            return false;
-        return this.compareTo((Version) that) == 0;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Version version1 = (Version) o;
+
+        return new EqualsBuilder().append(version, version1.version).isEquals();
     }
 
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(version).toHashCode();
+    }
 }
